@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans" 
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+       xmlns:aop="http://www.springframework.org/schema/aop" 
+       xmlns:tx="http://www.springframework.org/schema/tx" 
+       xmlns:context="http://www.springframework.org/schema/context" 
+       xsi:schemaLocation="
+       http://www.springframework.org/schema/beans 
+       http://www.springframework.org/schema/beans/spring-beans-4.0.xsd 
+       http://www.springframework.org/schema/aop 
+       http://www.springframework.org/schema/aop/spring-aop-4.0.xsd 
+       http://www.springframework.org/schema/tx 
+       http://www.springframework.org/schema/tx/spring-tx-4.0.xsd 
+       http://www.springframework.org/schema/context 
+       http://www.springframework.org/schema/context/spring-context-4.0.xsd ">
+
+    <context:property-placeholder location="classpath:resources.properties"/>
+
+    <!-- 扫描注解Bean -->
+    <context:component-scan base-package="com.ddy">
+        <context:exclude-filter type="annotation" expression="org.springframework.stereotype.Controller"/>
+    </context:component-scan>
+
+    <!-- 数据源 -->
+    <!--参考： https://github.com/alibaba/druid/wiki/%E9%85%8D%E7%BD%AE_DruidDataSource%E5%8F%82%E8%80%83%E9%85%8D%E7%BD%AE-->
+    <bean id="dataSource" class="com.alibaba.druid.pool.DruidDataSource" init-method="init" destroy-method="close">
+
+        <!-- 驱动 -->
+        <property name="driverClassName" value="${connection.driverClassName}" />
+
+        <!-- 基本属性 url、user、password -->
+        <property name="url" value="${connection.url}"/>
+        <property name="username" value="${connection.username}"/>
+        <property name="password" value="${connection.password}"/>
+
+        <!-- 配置初始化大小、最小、最大 -->
+        <property name="initialSize" value="10" />
+        <property name="minIdle" value="5" />
+        <property name="maxActive" value="50" />
+
+        <!-- 配置监控统计拦截的filters -->
+        <property name="filters" value="stat,log4j,wall" />
+
+        <!-- 配置获取连接等待超时的时间 -->
+        <property name="maxWait" value="60000" />
+
+        <!-- 配置间隔多久才进行一次检测，检测需要关闭的空闲连接，单位是毫秒 -->
+        <property name="timeBetweenEvictionRunsMillis" value="60000" />
+
+        <!-- 配置一个连接在池中最小生存的时间，单位是毫秒 -->
+        <property name="minEvictableIdleTimeMillis" value="300000" />
+
+        <property name="validationQuery" value="SELECT 'x'" />
+        <property name="testWhileIdle" value="false" />
+        <property name="testOnBorrow" value="false" />
+        <property name="testOnReturn" value="true" />
+
+        <!-- 打开PSCache，并且指定每个连接上PSCache的大小   PreparedStatementCache-->
+        <!-- 解释：http://www.cnblogs.com/alipayhutu/archive/2013/04/18/3029171.html -->
+        <property name="poolPreparedStatements" value="true" />
+        <property name="maxPoolPreparedStatementPerConnectionSize" value="20" />
+
+    </bean>
+
+    <bean id="dataSourceProxy" class="org.springframework.jdbc.datasource.TransactionAwareDataSourceProxy">
+        <property name="targetDataSource" ref="dataSource"/>
+    </bean>
+
+    <bean id="jdbcTemplate" class="org.springframework.jdbc.core.JdbcTemplate">
+        <constructor-arg ref="dataSourceProxy"/>
+    </bean>
+
+    <!--事务管理器配置-->
+    <bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+        <property name="dataSource" ref="dataSourceProxy"/>
+    </bean>
+
+    <tx:advice id="txAdvice" transaction-manager="transactionManager">
+        <tx:attributes>
+            <tx:method name="*" propagation="REQUIRED"/>
+        </tx:attributes>
+    </tx:advice>
+    
+    
+    <!-- 开启AOP监听 只对当前配置文件有效 -->
+    <aop:aspectj-autoproxy  expose-proxy="true" proxy-target-class="false"/>
+
+	<!-- aop监控所有操作 -->
+	<bean id="operationLog" class="com.ddy.dianmai.ops.interceptor.OperationInterceptor"/>
+
+    <aop:config expose-proxy="true" proxy-target-class="false">
+    	<!-- 只对业务逻辑层实施事务 -->
+        <aop:pointcut id="serviceOperation" expression="execution(* com.ddy.dianmai.ops.service..*.*(..))"/>  <!-- 切入点定义 -->
+        <aop:advisor id="txAdvisor" advice-ref="txAdvice" pointcut-ref="serviceOperation"/>  <!-- 定义只有一个通知和一个切入点的切面 -->
+    </aop:config>
+
+    <bean class="com.ddy.dianmai.ops.util.SpringUtils"/>
+    <bean class="com.ddy.dianmai.ops.util.PasswordHelper" />
+
+    
+    <!-- springmvc 控制器异常跳转 -->
+   	<bean class="com.ddy.dianmai.ops.interceptor.HandlerExceptionInterceptor"/>
+   	
+   	<!-- 定时任务 -->
+	<bean id="scheduler" class="org.springframework.scheduling.quartz.SchedulerFactoryBean" />
+    
+	<import resource="classpath:applicationContext-config-shiro.xml"/>
+    <import resource="classpath:applicationContext-config-druid.xml"/>
+    <import resource="classpath:applicationContext-config-javamelody.xml"/>
+</beans>

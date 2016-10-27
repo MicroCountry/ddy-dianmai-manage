@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:aop="http://www.springframework.org/schema/aop"
+       xsi:schemaLocation="
+       http://www.springframework.org/schema/beans
+       http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
+       http://www.springframework.org/schema/aop
+       http://www.springframework.org/schema/aop/spring-aop-4.0.xsd ">
+
+	<description>配置阿里Druid spring监控 </description>
+	
+    <bean id="druid-stat-interceptor" class="com.alibaba.druid.support.spring.stat.DruidStatInterceptor" />
+    
+    <bean id="druid-stat-pointcut" class="org.springframework.aop.support.JdkRegexpMethodPointcut" scope="prototype">
+	    <property name="patterns">
+	        <list>
+	            <value>com.ddy.dianmai.ops.service.*</value>
+	        </list>
+	    </property>
+	</bean>
+	
+	<!-- 
+		expose-proxy 当前代理是否为可暴露状态,值是"ture",则为可访问   false不能
+		proxy-target-class 为true时为基于类的代理  为false或者这个属性被省略那么基于接口的代理 
+	-->
+	<aop:config expose-proxy="true" proxy-target-class="false">
+    	<aop:advisor advice-ref="druid-stat-interceptor"  pointcut-ref="druid-stat-pointcut" />
+	</aop:config>
+    
+</beans>

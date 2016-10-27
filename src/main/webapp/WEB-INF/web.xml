@@ -1,0 +1,177 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app
+        xmlns="http://java.sun.com/xml/ns/javaee"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd"
+        version="3.0"
+        metadata-complete="true">
+
+    <display-name>ddy-dianmai-manage</display-name>
+
+    <!-- Spring配置文件开始  -->
+    <context-param>
+        <param-name>contextConfigLocation</param-name>
+        <param-value>classpath:applicationContext-config.xml</param-value>
+    </context-param>
+    <listener>
+        <listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
+    </listener>
+    <!-- Spring配置文件结束 -->
+
+
+
+    <!-- 可以使用RequestContextHolder.currentRequestAttributes() 获取到请求的attr -->
+    <listener>
+        <listener-class>org.springframework.web.context.request.RequestContextListener</listener-class>
+    </listener>
+
+	<!-- shiro 安全过滤器  Shiro的filter必须放在其他filter之前-->
+    <filter>
+        <filter-name>shiroFilter</filter-name>
+        <filter-class>org.springframework.web.filter.DelegatingFilterProxy</filter-class>
+        <async-supported>true</async-supported>
+        <init-param>
+            <param-name>targetFilterLifecycle</param-name>
+            <param-value>true</param-value>
+        </init-param>
+    </filter>
+
+    <filter-mapping>
+        <filter-name>shiroFilter</filter-name>
+        <url-pattern>/*</url-pattern>
+        <dispatcher>REQUEST</dispatcher>
+    </filter-mapping>
+
+
+
+    <!-- spring中文处理 -->
+    <filter>
+        <filter-name>encodingFilter</filter-name>
+        <filter-class>org.springframework.web.filter.CharacterEncodingFilter</filter-class>
+        <init-param>
+            <param-name>encoding</param-name>
+            <param-value>UTF-8</param-value>
+        </init-param>
+        <init-param>
+            <param-name>forceEncoding</param-name>
+            <param-value>true</param-value>
+        </init-param>
+    </filter>
+
+    <filter-mapping>
+        <filter-name>encodingFilter</filter-name>
+        <url-pattern>/*</url-pattern>
+    </filter-mapping>
+
+
+    <servlet>
+        <servlet-name>spring</servlet-name>
+        <servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
+        <init-param>
+            <param-name>contextConfigLocation</param-name>
+            <param-value>classpath:applicationContext-mvc.xml</param-value>
+        </init-param>
+        <load-on-startup>1</load-on-startup>
+        <async-supported>true</async-supported>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>spring</servlet-name>
+        <url-pattern>/</url-pattern>
+    </servlet-mapping>
+   
+    <!-- ++++++++++++++++++++++++++++++++++++++++++++++++++++++++阿里Druid Monitor+++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
+    <servlet>
+        <servlet-name>DruidStatView</servlet-name>
+        <servlet-class>com.alibaba.druid.support.http.StatViewServlet</servlet-class>
+
+        <!-- 访问监控页面的IP限制 -->
+        <!-- deny优先于allow，如果在deny列表中，就算在allow列表中，也会被拒绝。 -->
+        <!-- 如果allow没有配置或者为空，则允许所有访问。 -->
+        <init-param>
+            <param-name>allow</param-name>
+            <param-value>127.0.0.1</param-value>
+        </init-param>
+        <init-param>
+            <param-name>deny</param-name>
+            <param-value>128.242.127.4</param-value>
+        </init-param>
+
+        <!-- 配置resetEnable -->
+        <init-param>
+            <param-name>resetEnable</param-name>
+            <param-value>true</param-value><!-- false-关闭重置 true-开启重置 -->
+        </init-param>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>DruidStatView</servlet-name>
+        <url-pattern>/druid/*</url-pattern>
+    </servlet-mapping>
+
+    <!-- web监控 -->
+    <filter>
+        <filter-name>DruidWebStatFilter</filter-name>
+        <filter-class>com.alibaba.druid.support.http.WebStatFilter</filter-class>
+        <!-- 不必要的url监控 -->
+        <init-param>
+            <param-name>exclusions</param-name>
+            <param-value>*.js,*.gif,*.jpg,*.png,*.css,*.ico,/druid/*,/monitoring*</param-value>
+        </init-param>
+
+        <!-- 开启或者关闭session监控  true-开启   false-关闭 -->
+        <init-param>
+            <param-name>sessionStatEnable</param-name>
+            <param-value>true</param-value>
+        </init-param>
+
+        <!-- session监控数量设置 缺省值为1000 -->
+        <init-param>
+            <param-name>sessionStatMaxCount</param-name>
+            <param-value>5000</param-value>
+        </init-param>
+
+        <!-- session名称 -->
+        <init-param>
+            <param-name>principalSessionName</param-name>
+            <param-value>user</param-value>
+        </init-param>
+
+        <!-- 监控单个url调用的sql列表 -->
+        <init-param>
+            <param-name>profileEnable</param-name>
+            <param-value>true</param-value>
+        </init-param>
+    </filter>
+
+    <filter-mapping>
+        <filter-name>DruidWebStatFilter</filter-name>
+        <url-pattern>/*</url-pattern>
+    </filter-mapping>
+
+
+	<!-- ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++Java项目性能监控和调优工具-Javamelody 配置+++++++++++++++++++++++++++++++++++++++++++++++++ -->
+	<filter>
+		<filter-name>monitoring</filter-name>
+		<filter-class>net.bull.javamelody.MonitoringFilter</filter-class>
+		
+		<!-- 开启info级别的日志 -->
+		<init-param>
+			<param-name>log</param-name>
+			<param-value>true</param-value>
+		</init-param>
+		
+		<!-- 排除一些url不监控 -->
+		<init-param>
+			<param-name>url-exclude-pattern</param-name>
+			<param-value>(/druid/.*|/static/.*)</param-value>
+		</init-param>
+		
+	</filter>
+	<filter-mapping>
+		<filter-name>monitoring</filter-name>
+		<url-pattern>/*</url-pattern>
+	</filter-mapping>
+	<listener>
+		<listener-class>net.bull.javamelody.SessionListener</listener-class>
+	</listener>
+	
+</web-app>
