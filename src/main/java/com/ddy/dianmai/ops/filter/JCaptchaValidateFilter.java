@@ -54,6 +54,6 @@ public class JCaptchaValidateFilter extends AccessControlFilter {
     protected boolean onAccessDenied(ServletRequest request, ServletResponse response) throws Exception {
         //如果验证码失败了，存储失败key属性
         request.setAttribute(failureKeyAttribute, "jCaptcha.error");
-        return false;
+        return true;
     }
 }
