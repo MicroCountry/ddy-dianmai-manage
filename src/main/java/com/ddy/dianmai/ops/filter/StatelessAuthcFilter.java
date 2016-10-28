@@ -174,7 +174,7 @@ public class StatelessAuthcFilter extends AuthenticatingFilter {
         HttpServletResponse httpResponse = (HttpServletResponse) response;
         httpResponse.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
         String type = "application/json";
-        String content = ShiroResponseUtil.getAuthcFailResponse();
+        String content = error/*ShiroResponseUtil.getAuthcFailResponse()*/;
         try {
             httpResponse.setContentType(type + ";charset=UTF-8");
             httpResponse.setHeader("Pragma", "No-cache");
