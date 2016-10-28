@@ -138,6 +138,13 @@
 		<property name="sessionDAO" ref="sessionDAO"/>
 	</bean>
 	
+	
+	<!-- 图形验证码 -->
+	<bean id="jCaptchaValidateFilter" class="com.ddy.dianmai.ops.filter.JCaptchaValidateFilter">
+        <property name="jcaptchaEbabled" value="true"/>
+        <property name="jcaptchaParam" value="jcaptchaCode"/>
+        <property name="failureKeyAttribute" value="shiroLoginFailure"/>
+    </bean>
     <!-- Shiro的Web过滤器 -->
     <bean id="shiroFilter" class="org.apache.shiro.spring.web.ShiroFilterFactoryBean">
         <property name="securityManager" ref="securityManager"/>
@@ -149,15 +156,17 @@
                 <entry key="kickout" value-ref="kickoutSessionControlFilter"/>
                 <entry key="forceLogout" value-ref="forceLogoutFilter"/>
                 <entry key="online" value-ref="onlineFilter"/>
+                <entry key="jCaptchaValidate" value-ref="jCaptchaValidateFilter"/>
             </util:map>
         </property>
         <property name="filterChainDefinitions">
             <value>
-                /login = authc
+                /jcaptcha* = anon
+                /login = jCaptchaValidate,authc
                 /static/** = anon
                 /logout = logout
                 /authenticated = authc
-                /** = forceLogout,kickout,sysUser,online
+                /** = forceLogout,kickout,user,sysUser,online
             </value>
         </property>
     </bean>
