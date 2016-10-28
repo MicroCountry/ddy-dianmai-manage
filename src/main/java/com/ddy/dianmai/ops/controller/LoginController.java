@@ -30,6 +30,9 @@ public class LoginController {
         } else if(exceptionClassName != null) {
             error = "其他错误：" + exceptionClassName;
         }
+        if("jCaptcha.error".equals(exceptionClassName)) {
+        	error="验证码错误";
+    	}
         String kickout = req.getParameter("kickout");
         String forceLogout = req.getParameter("forceLogout");
         if(StringUtils.hasText(kickout)){
