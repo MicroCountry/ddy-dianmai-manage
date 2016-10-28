@@ -116,7 +116,7 @@ public class StatelessAuthcFilter extends AuthenticatingFilter {
     	if("jCaptcha.error".equals(validate)) {
     		DDYRsp rsp = new DDYRsp();
 			rsp.setCode(CodeEnum.CODE_ERROR.getValue());
-            onLoginFail(response,"验证码错误");
+            onLoginFail(response,rsp.toString());
             return false;
     	}
     	BufferedReader br = new BufferedReader(new InputStreamReader(request.getInputStream(),"UTF-8"));
