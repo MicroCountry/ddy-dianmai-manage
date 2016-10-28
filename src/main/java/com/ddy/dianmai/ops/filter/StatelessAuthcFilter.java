@@ -143,6 +143,7 @@ public class StatelessAuthcFilter extends AuthenticatingFilter {
 			onLoginFail(response,rsp.toString());
 			return false;
 		}
+	    DDYRsp rsp = new DDYRsp();
     	//UsernamePasswordToken token = new UsernamePasswordToken(username, password);
 		 AuthenticationToken token = createToken(request, response);
 		 Subject subject = getSubject(request, response);
@@ -153,17 +154,21 @@ public class StatelessAuthcFilter extends AuthenticatingFilter {
             String error = null;
             if( e instanceof UnknownAccountException ){
                 error = "用户名/密码错误";
+                rsp.setCode(CodeEnum.USERPASS.getValue());
             }else if(e instanceof IncorrectCredentialsException){
                 error = "会话过期，请重新登录";
+                rsp.setCode(CodeEnum.SESSION_INVILAD.getValue());
             }else if("jCaptcha.error".equals(e)) {
                 error = "验证码错误";
+                rsp.setCode(CodeEnum.CODE_ERROR.getValue());
             }
             String exceptionClassName = (String)request.getAttribute("shiroLoginFailure");
             if(UnknownAccountException.class.getName().equals(exceptionClassName)) {
                 error = "用户名/密码错误";
+                rsp.setCode(CodeEnum.USERPASS.getValue());
             }
             System.out.println("error:"+error);
-            onLoginFail(response,error);
+            onLoginFail(response,rsp.toString());
             return false;
         }
         return onLoginSuccess(token, subject, request, response);
