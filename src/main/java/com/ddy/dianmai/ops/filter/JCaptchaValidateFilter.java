@@ -40,12 +40,13 @@ public class JCaptchaValidateFilter extends AccessControlFilter {
     protected boolean isAccessAllowed(ServletRequest request, ServletResponse response, Object mappedValue) throws Exception {
         //1、设置验证码是否开启属性，页面可以根据该属性来决定是否显示验证码
         request.setAttribute("jcaptchaEbabled", jcaptchaEbabled);
-
+        System.out.println("JCaptchaValidateFilter-isAccessAllowed");
         HttpServletRequest httpServletRequest = WebUtils.toHttp(request);
         //2、判断验证码是否禁用 或不是表单提交（允许访问）
         if (jcaptchaEbabled == false || !"post".equalsIgnoreCase(httpServletRequest.getMethod())) {
             return true;
         }
+        System.out.println("JCaptchaValidateFilter"+httpServletRequest.getParameter(jcaptchaParam));
         //3、此时是表单提交，验证验证码是否正确
         return JCaptcha.validateResponse(httpServletRequest, httpServletRequest.getParameter(jcaptchaParam));
     }

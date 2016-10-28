@@ -112,6 +112,13 @@ public class StatelessAuthcFilter extends AuthenticatingFilter {
     @Override
     protected boolean onAccessDenied(ServletRequest request, ServletResponse response) throws Exception {
     	System.out.println("StatelessAuthcFilter-onAccessDenied");
+    	String validate = (String)request.getAttribute("shiroLoginFailure");
+    	if("jCaptcha.error".equals(validate)) {
+    		DDYRsp rsp = new DDYRsp();
+			rsp.setCode(CodeEnum.CODE_ERROR.getValue());
+            onLoginFail(response,"验证码错误");
+            return false;
+    	}
     	BufferedReader br = new BufferedReader(new InputStreamReader(request.getInputStream(),"UTF-8"));
 		StringBuilder sb = new StringBuilder();
 		String temp = null;
@@ -148,6 +155,8 @@ public class StatelessAuthcFilter extends AuthenticatingFilter {
                 error = "用户名/密码错误";
             }else if(e instanceof IncorrectCredentialsException){
                 error = "会话过期，请重新登录";
+            }else if("jCaptcha.error".equals(e)) {
+                error = "验证码错误";
             }
             String exceptionClassName = (String)request.getAttribute("shiroLoginFailure");
             if(UnknownAccountException.class.getName().equals(exceptionClassName)) {
