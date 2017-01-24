@@ -11,16 +11,21 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.ddy.dianmai.ops.po.DDYRsp;
+import com.ddy.dianmai.ops.po.RequestPo;
 import com.ddy.dianmai.ops.po.User;
 import com.ddy.dianmai.ops.service.RoleService;
 import com.ddy.dianmai.ops.service.UserService;
 import com.ddy.dianmai.ops.util.Page;
+import com.google.gson.Gson;
+
+import ddy.dianmai.web.util.HttpUtil;
 
 @Controller
 @RequestMapping(value="/user",produces="text/plain;charset=UTF-8")
@@ -77,10 +82,12 @@ public class UserController {
     @RequiresPermissions("sys:user:create")
     @RequestMapping(value = "/create", method = RequestMethod.POST)
     @ResponseBody
-    public String create(User user, RedirectAttributes redirectAttributes) {
+    public String create(ModelMap model) {
+    	String context =  HttpUtil.getDDYDataAttributeString(); 
+    	User user = new Gson().fromJson(context, User.class);
         userService.createUser(user);
         DDYRsp rsp = new DDYRsp();
-        rsp.setData("删除成功");
+        rsp.setData("新增成功");
         return rsp.toString();
     }
 
@@ -100,7 +107,7 @@ public class UserController {
     @RequiresPermissions("sys:user:update")
     @RequestMapping(value = "/{id}/update", method = RequestMethod.POST)
     @ResponseBody
-    public String update(User user, RedirectAttributes redirectAttributes) {
+    public String update(@RequestBody User user, RedirectAttributes redirectAttributes) {
         userService.updateUser(user);
         DDYRsp rsp = new DDYRsp();
         rsp.setData("修改成功");
@@ -133,8 +140,10 @@ public class UserController {
     @RequiresPermissions("sys:user:update")
     @RequestMapping(value = "/{id}/changePassword", method = RequestMethod.POST)
     @ResponseBody
-    public String changePassword(@PathVariable("id") Long id, String newPassword, RedirectAttributes redirectAttributes) {
-        userService.changePassword(id, newPassword);
+    public String changePassword(@PathVariable("id") Long id,ModelMap model) {
+    	String context =  HttpUtil.getDDYDataAttributeString(); 
+		RequestPo req = new Gson().fromJson(context, RequestPo.class);
+        userService.changePassword(id, req.getNewPassword());
         DDYRsp rsp = new DDYRsp();
         rsp.setData("修改密码成功");
         return rsp.toString();

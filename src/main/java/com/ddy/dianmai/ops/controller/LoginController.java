@@ -5,18 +5,25 @@ import javax.servlet.http.HttpServletRequest;
 import org.apache.shiro.authc.IncorrectCredentialsException;
 import org.apache.shiro.authc.UnknownAccountException;
 import org.apache.shiro.util.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.ddy.dianmai.ops.po.CodeEnum;
+import com.ddy.dianmai.ops.dao.UserDao;
 import com.ddy.dianmai.ops.po.DDYRsp;
+import com.ddy.dianmai.ops.po.ReturnLogin;
+import com.ddy.dianmai.ops.po.User;
 
 @Controller
 @RequestMapping(produces="text/plain;charset=UTF-8")
 public class LoginController {
 
+	@Autowired
+    private UserDao userDao;
+	
     @RequestMapping(value = "/login")
     @ResponseBody
     public String showLoginForm(HttpServletRequest req, ModelMap model) {
@@ -35,6 +42,9 @@ public class LoginController {
     	}
         String kickout = req.getParameter("kickout");
         String forceLogout = req.getParameter("forceLogout");
+        String sid = (String)req.getAttribute("sid");
+        String username = (String)req.getAttribute("username");
+        User user = userDao.findByUsername(username);
         if(StringUtils.hasText(kickout)){
         	error = "您的账号已在其他地方登录";
         }
@@ -44,6 +54,13 @@ public class LoginController {
         System.out.println("login:error:"+error);
         if(error!=null)
         	rsp.setCodeAndParams(CodeEnum.LOGERROR.getValue(),new Object[]{error});
+        ReturnLogin returnLogin = new ReturnLogin();
+        returnLogin.setId(user.getId());
+        returnLogin.setUsername(username);
+        returnLogin.setRoleIds(user.getRoleIds());
+        returnLogin.setLocked(user.getLocked());
+        returnLogin.setSid(sid);
+        rsp.setData(returnLogin);
         return rsp.toString();
     }
 
