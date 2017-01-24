@@ -54,5 +54,11 @@
         <appender-ref ref="console" />
         <appender-ref ref="traceLog4Debug" />
     </logger>
+    
+    <logger name="com.ddy">
+        <level value="ALL" />
+        <appender-ref ref="console" />
+        <appender-ref ref="traceLog4Debug" />
+    </logger>
 	
 </log4j:configuration>

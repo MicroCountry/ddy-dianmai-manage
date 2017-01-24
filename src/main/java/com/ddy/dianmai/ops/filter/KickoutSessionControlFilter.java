@@ -9,9 +9,14 @@ import org.apache.shiro.subject.Subject;
 import org.apache.shiro.web.filter.AccessControlFilter;
 import org.apache.shiro.web.util.WebUtils;
 
+import com.ddy.dianmai.ops.po.CodeEnum;
+import com.ddy.dianmai.ops.po.DDYRsp;
+
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
+import javax.servlet.http.HttpServletResponse;
 
+import java.io.IOException;
 import java.io.Serializable;
 import java.util.Deque;
 import java.util.LinkedList;
@@ -108,9 +113,30 @@ public class KickoutSessionControlFilter extends AccessControlFilter {
             } catch (Exception e) {
             }
             saveRequest(request);
-            WebUtils.issueRedirect(request, response, kickoutUrl);
+            //WebUtils.issueRedirect(request, response, kickoutUrl);
+            DDYRsp rsp = new DDYRsp();
+            rsp.setCode(CodeEnum.RETRY_LOGIN.getValue());
+            onLoginFail(response, rsp.toString());
             return false;
         }
         return true;
+    }
+    
+    //登录失败时默认返回401状态码
+    private void onLoginFail(ServletResponse response,String error) throws IOException {
+        HttpServletResponse httpResponse = (HttpServletResponse) response;
+        httpResponse.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+        String type = "application/json";
+        String content = error/*ShiroResponseUtil.getAuthcFailResponse()*/;
+        try {
+            httpResponse.setContentType(type + ";charset=UTF-8");
+            httpResponse.setHeader("Pragma", "No-cache");
+            httpResponse.setHeader("Cache-Control", "no-cache");
+            httpResponse.setDateHeader("Expires", 0);
+            httpResponse.getWriter().write(content);
+            httpResponse.getWriter().flush();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }

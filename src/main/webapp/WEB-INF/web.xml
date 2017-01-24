@@ -18,6 +18,14 @@
     </listener>
     <!-- Spring配置文件结束 -->
 
+	<!-- log4j 系统日志-->
+	<context-param> 
+	  	<param-name>log4jConfigLocation</param-name> 
+	 	<param-value>/WEB-INF/log4j.xml</param-value> 
+	</context-param> 
+	<listener> 
+	  	<listener-class>org.springframework.web.util.Log4jConfigListener</listener-class> 
+	</listener>
 
 
     <!-- 可以使用RequestContextHolder.currentRequestAttributes() 获取到请求的attr -->

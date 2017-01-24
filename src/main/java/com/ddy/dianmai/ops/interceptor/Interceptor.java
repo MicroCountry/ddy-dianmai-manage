@@ -9,6 +9,11 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
 
 import com.ddy.dianmai.ops.Constants;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+
+import ddy.dianmai.web.util.HttpUtil;
 
 
 /**
@@ -58,6 +63,16 @@ public class Interceptor extends HandlerInterceptorAdapter {
             request.setAttribute(Constants.BACK_URL, extractBackURL(request));
         }
 
+        String content = HttpUtil.getRequestContent();
+		response.setCharacterEncoding("UTF-8");
+		response.setHeader("Content-type", "text/html;charset=UTF-8");
+		 JsonObject jsonObject = null;
+		if(org.apache.commons.lang.StringUtils.isNotBlank(content)){
+			 JsonParser parser = new JsonParser();
+             JsonElement jsonEle = parser.parse(content);
+             jsonObject = jsonEle.getAsJsonObject();
+             HttpUtil.setRequestAttribuesDDYData(jsonObject.toString());
+		}
         return true;
     }
 

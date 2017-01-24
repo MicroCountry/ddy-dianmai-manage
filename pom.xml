@@ -6,10 +6,37 @@
   <packaging>war</packaging>
   <dependencies>
 		<dependency>
-			<groupId>junit</groupId>
-			<artifactId>junit</artifactId>
-			<version>4.9</version>
-			<scope>test</scope>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-aop</artifactId>
+			<version>4.1.6.RELEASE</version>
+		</dependency>
+		<dependency>
+	  		  <groupId>ddy-dianmai-pojo</groupId>
+			  <artifactId>ddy-dianmai-pojo</artifactId>
+			  <version>0.0.1-SNAPSHOT</version>
+			  <exclusions>
+			  	<exclusion>
+			  		<artifactId>gson</artifactId>
+			  		<groupId>com.google.code.gson</groupId>
+			  	</exclusion>
+			  </exclusions>
+		</dependency>
+	  	<dependency>
+	  		  <groupId>ddy-dianmai-util</groupId>
+			  <artifactId>ddy-dianmai-util</artifactId>
+			  <version>0.0.1-SNAPSHOT</version>
+	  	</dependency>
+		<dependency> 
+			<groupId>ddy</groupId>
+			<artifactId>gson</artifactId>
+			<version>1.0.0</version>
+			<scope>system</scope>
+			<systemPath>${project.basedir}/src/main/webapp/WEB-INF/lib/gson.jar</systemPath>
+		</dependency>
+		<dependency>
+			<groupId>com.alibaba</groupId>
+			<artifactId>fastjson</artifactId>
+			<version>1.2.6</version>
 		</dependency>
 		<dependency>
 			<groupId>commons-logging</groupId>
@@ -121,8 +148,18 @@
 			<artifactId>jstl</artifactId>
 			<version>1.2</version>
 		</dependency>
-
-        <!-- 监控地址 http://localhost:8080/shiro/druid/index.html -->
+		<!-- aspectj相关jar包 -->
+		<dependency>
+			<groupId>org.aspectj</groupId>
+			<artifactId>aspectjrt</artifactId>
+			<version>1.7.4</version>
+		</dependency>
+		<dependency>
+			<groupId>org.aspectj</groupId>
+			<artifactId>aspectjweaver</artifactId>
+			<version>1.7.4</version>
+		</dependency>
+		 <!-- 监控地址 http://localhost:8080/shiro/druid/index.html -->
         <!-- 阿里巴巴数据源连接池 -->
         <dependency>
             <groupId>com.alibaba</groupId> 
@@ -210,17 +247,45 @@
                 </exclusion>
             </exclusions>
         </dependency>
-	</dependencies>
-	
+        <dependency>
+        	<groupId>com.alibaba</groupId>
+        	<artifactId>dubbo</artifactId>
+        	<version>2.8.4</version>
+        	<exclusions>
+        		<exclusion>
+        			<artifactId>spring</artifactId>
+        			<groupId>org.springframework</groupId>
+        		</exclusion>
+        		<exclusion>
+        			<artifactId>spring-expression</artifactId>
+        			<groupId>org.springframework</groupId>
+        		</exclusion>
+        		<exclusion>
+        			<artifactId>spring-context</artifactId>
+        			<groupId>org.springframework</groupId>
+        		</exclusion>
+        		<exclusion>
+        			<artifactId>spring-web</artifactId>
+        			<groupId>org.springframework</groupId>
+        		</exclusion>
+        	</exclusions>
+        </dependency>
+	</dependencies> 
+
 	<build>
 		<finalName>ddy-dianmai-manage</finalName>
 		<plugins>
 			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-resources-plugin</artifactId>
-				<configuration>
-					<encoding>UTF-8</encoding>
-				</configuration>
+		        <groupId>org.apache.maven.plugins</groupId>
+		        <artifactId>maven-surefire-plugin</artifactId>
+		        <configuration>
+		          <skip>true</skip>
+		        </configuration>
+		      </plugin>
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>build-helper-maven-plugin</artifactId>
+				<version>1.5</version>
 			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>

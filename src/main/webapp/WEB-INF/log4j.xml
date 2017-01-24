@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE log4j:configuration SYSTEM "log4j.dtd">
+<log4j:configuration xmlns:log4j='http://jakarta.apache.org/log4j/'>
+	
+	<!-- ### 输出信息到控制抬 ### -->
+	<appender name="console" class="org.apache.log4j.ConsoleAppender">
+        <layout class="org.apache.log4j.PatternLayout">
+            <param name="ConversionPattern" value="[%d{yyyy-MM-dd HH:mm:ss} %p] [%t] %c{1}.%M(%L) | %m%n"/>
+        </layout>
+    </appender>
+
+
+	<!-- ### 输出所有级别的日志 ### -->
+	<appender name="traceLog4Debug" class="org.apache.log4j.DailyRollingFileAppender">
+		<param name="File" value="/ddy/logs/ops/ddy-dianmai-ops.log" />
+		<param name="DatePattern" value="'.'yyyy-MM-dd" />
+		<layout class="org.apache.log4j.PatternLayout">
+			<param name="ConversionPattern" value="[%d{yyyy-MM-dd HH:mm:ss} %p] [%t] %c{1}.%M(%L) | %m%n" />
+		</layout>
+	</appender>
+	
+	<logger name="org.springframework">
+        <level value="WARN"/>
+        <appender-ref ref="console" />
+        <appender-ref ref="traceLog4Debug" />
+    </logger>
+    
+    <logger name="org.apache">
+        <level value="WARN"/>
+        <appender-ref ref="console" />
+        <appender-ref ref="traceLog4Debug" />
+    </logger>
+    
+    <logger name="org.apache.shiro">
+        <level value="WARN"/>
+        <appender-ref ref="console" />
+        <appender-ref ref="traceLog4Debug" />
+    </logger>
+    
+    <logger name="com.alibaba">
+        <level value="WARN"/>
+        <appender-ref ref="console" />
+        <appender-ref ref="traceLog4Debug" />
+    </logger>
+    
+    <logger name="net.bull.javamelody">
+        <level value="WARN"/>
+        <appender-ref ref="console" />
+        <appender-ref ref="traceLog4Debug" />
+    </logger>
+    
+    <logger name="com.shiro">
+        <level value="ALL" />
+        <appender-ref ref="console" />
+        <appender-ref ref="traceLog4Debug" />
+    </logger>
+    
+    <logger name="com.ddy">
+        <level value="ALL" />
+        <appender-ref ref="console" />
+        <appender-ref ref="traceLog4Debug" />
+    </logger>
+	
+</log4j:configuration>

@@ -45,6 +45,12 @@
         <property name="suffix" value=".jsp"/>
     </bean>
 	
+	<!-- 控制器异常处理 -->
+    <bean id="exceptionHandlerExceptionResolver" class="org.springframework.web.servlet.mvc.method.annotation.ExceptionHandlerExceptionResolver">
+    </bean>
+
+    <bean class="com.ddy.dianmai.ops.exception.DefaultExceptionHandler"/>
+	
 	<import resource="classpath:applicationContext-mvc-shiro.xml"/>
     
 </beans>

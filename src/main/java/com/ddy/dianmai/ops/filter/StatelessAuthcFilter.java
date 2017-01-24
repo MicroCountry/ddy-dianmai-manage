@@ -13,6 +13,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.shiro.authc.AuthenticationException;
 import org.apache.shiro.authc.AuthenticationToken;
+import org.apache.shiro.authc.ExcessiveAttemptsException;
 import org.apache.shiro.authc.IncorrectCredentialsException;
 import org.apache.shiro.authc.UnknownAccountException;
 import org.apache.shiro.authc.UsernamePasswordToken;
@@ -132,14 +133,21 @@ public class StatelessAuthcFilter extends AuthenticatingFilter {
 		System.out.println(sb.toString());
 		String context = sb.toString();
 		JSONObject obj = JSONObject.parseObject(context);
-		String username =obj.getString("username");
-		String password =obj.getString("password");
+		String username = null;
+		String password = null;
+		try {
+			username = obj.getString("username");
+			password = obj.getString("password");
+		} catch (Exception e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
 		this.setUsernameParam(username);
 		this.setPasswordParam(password);
 		if(StringUtils.isBlank(password)||StringUtils.isBlank(username)){
 			System.out.println("string error");
 			DDYRsp rsp = new DDYRsp();
-			rsp.setCode(CodeEnum.REQUEST_INVILAD.getValue());
+			rsp.setCode(CodeEnum.SESSION_INVILAD.getValue());
 			onLoginFail(response,rsp.toString());
 			return false;
 		}
@@ -149,9 +157,12 @@ public class StatelessAuthcFilter extends AuthenticatingFilter {
 		 Subject subject = getSubject(request, response);
         try {
             subject.login(token);
-            System.out.println("subject.login");
+            System.out.println("subject.login"+subject.getSession().getId());
+            request.setAttribute("sid", subject.getSession().getId());
+            request.setAttribute("username", username);
         } catch (Exception e) {
             String error = null;
+            e.printStackTrace();
             if( e instanceof UnknownAccountException ){
                 error = "用户名/密码错误";
                 rsp.setCode(CodeEnum.USERPASS.getValue());
@@ -161,6 +172,9 @@ public class StatelessAuthcFilter extends AuthenticatingFilter {
             }else if("jCaptcha.error".equals(e)) {
                 error = "验证码错误";
                 rsp.setCode(CodeEnum.CODE_ERROR.getValue());
+            }else if(e instanceof ExcessiveAttemptsException ){
+            	error = "登录失败次数过多";
+                rsp.setCode(CodeEnum.USERPASS.getValue());
             }
             String exceptionClassName = (String)request.getAttribute("shiroLoginFailure");
             if(UnknownAccountException.class.getName().equals(exceptionClassName)) {
@@ -217,9 +231,9 @@ public class StatelessAuthcFilter extends AuthenticatingFilter {
 
     protected boolean onLoginSuccess(AuthenticationToken token, Subject subject,
                                      ServletRequest request, ServletResponse response) throws Exception {
-        issueSuccessRedirect(request, response);
+        //issueSuccessRedirect(request, response);
         //we handled the success redirect directly, prevent the chain from continuing:
-        return false;
+        return true;
     }
 
     protected boolean onLoginFailure(AuthenticationToken token, AuthenticationException e,

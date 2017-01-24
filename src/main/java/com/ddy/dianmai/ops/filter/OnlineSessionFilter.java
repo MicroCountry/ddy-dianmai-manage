@@ -9,6 +9,7 @@ import java.io.IOException;
 
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
+import javax.servlet.http.HttpServletResponse;
 
 import org.apache.shiro.session.Session;
 import org.apache.shiro.session.mgt.OnlineSession;
@@ -18,6 +19,8 @@ import org.apache.shiro.web.filter.AccessControlFilter;
 import org.apache.shiro.web.util.WebUtils;
 
 import com.ddy.dianmai.ops.Constants;
+import com.ddy.dianmai.ops.po.CodeEnum;
+import com.ddy.dianmai.ops.po.DDYRsp;
 
 public class OnlineSessionFilter extends AccessControlFilter {
 
@@ -73,7 +76,26 @@ public class OnlineSessionFilter extends AccessControlFilter {
 
     protected void redirectToLogin(ServletRequest request, ServletResponse response) throws IOException {
     	System.out.println("OnlineSessionFilter-redirectToLogin");
-        WebUtils.issueRedirect(request, response, getForceLogoutUrl());
+    	DDYRsp rsp = new DDYRsp();
+        rsp.setCode(CodeEnum.RETRY_LOGIN.getValue());
+        onLoginFail(response, rsp.toString());
+    	//WebUtils.issueRedirect(request, response, getForceLogoutUrl());
     }
-
+    //登录失败时默认返回401状态码
+    private void onLoginFail(ServletResponse response,String error) throws IOException {
+        HttpServletResponse httpResponse = (HttpServletResponse) response;
+        httpResponse.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+        String type = "application/json";
+        String content = error/*ShiroResponseUtil.getAuthcFailResponse()*/;
+        try {
+            httpResponse.setContentType(type + ";charset=UTF-8");
+            httpResponse.setHeader("Pragma", "No-cache");
+            httpResponse.setHeader("Cache-Control", "no-cache");
+            httpResponse.setDateHeader("Expires", 0);
+            httpResponse.getWriter().write(content);
+            httpResponse.getWriter().flush();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 }
